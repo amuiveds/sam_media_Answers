@@ -1,0 +1,373 @@
+Question 1: Code critique
+
+The high traffic back-end systems that are in use by Sam Media require robust and quality code.
+
+Please review the following code and list all the coding errors and poor coding practices that you can see in this code. There are at least 10 of them, some very obvious, others sneakily hidden !
+
+function output()
+{
+	// Check authorization
+	if(is_authorized())
+	{
+		$authorized = true;
+		include('/path/to/' . $_REQUEST['module'] . '.php');
+	}
+	echo "<ul>"
+	$conn = mysql_connect( "mysql.foo.org:412", "kum", "overmoon" );
+	mysql_select_db( "kum", $conn ); // selects a database
+	$q = " SELECT * FROM main WHERE id > " . $_GET["id"]. ";";
+	$res = mysql_query( $q, $conn);
+	while( $row = mysql_fetch_assoc( $res ) )
+	{
+		echo "<li>".$row['description']."</li>";
+	}
+	echo "</ul><br><ul>";
+	$q = " SELECT * FROM main WHERE id < " . $_GET["id"]. ";";
+	$res = mysql_query( $q, $conn);
+	while( $row = mysql_fetch_assoc( $res ) )
+	{
+		// Display the status if it is authorized, othewise display N/A
+		echo "<li>".$row['description']. "(" .
+		$authorized ? $row['status'] : "N/A" . ")</li>";
+	}
+	echo "</ul>";
+}
+
+						Answers:
+
+1) We should not use  $_REQUEST['module'] because it to be known which method the data is coming; either get, post, or cookie.
+
+2) Database credentials should not be hard-coded into the script. It should be include from a file that's in a secure location (not in htdocs / www folder). Preferably, I would like to encrypt it.
+
+3) The mysql_ extension (mysql_connect, mysql_query, etc.) is flagged for deprecation. Use PDO or MySQLi extensions instead. I recommend PDO because it can be used for any major RDBS.
+
+4) Its wrong way of user-defined variables directly into SQL statements. It makes vulnerable to SQL injection attacks. Sanitize the inputs, prepare your SQL statements with placeholders, then bind the variables to them.
+
+5) Full error handling should be for catching any errors. It may be database server is unreachable, database is missing or table is missing?
+
+6) PHP contained variable should be in double quotes other wise in single quotes.
+
+$city = 'New Delhi';
+$profilestr = "I live in India at  $city.";
+
+7) When we have to fetch limited(1-4) columns; we should always mention column name in SQL Query instead *.
+
+8) We should always write disconnect your database handle once you're done with it.
+Question 2: Speed typing !
+
+This is the on-screen keyboard from one of the video communication devices we use in our office:
+
+A
+B
+C
+D
+E
+F
+G
+H
+I
+J
+K
+L
+M
+N
+O
+P
+Q
+R
+S
+T
+U
+V
+W
+X
+Y
+Z
+a
+b
+c
+d
+e
+f
+g
+h
+i
+j
+k
+l
+m
+n
+o
+p
+q
+r
+s
+t
+u
+v
+w
+x
+y
+z
+0
+1
+2
+3
+4
+5
+6
+7
+8
+9
+!
+@
+#
+$
+%
+^
+&
+*
+(
+)
+?
+/
+|
+\
++
+-
+`
+~
+[
+]
+{
+}
+<
+>
+
+SPACE
+.
+,
+;
+:
+‘
+“
+_
+=
+BS
+
+The on-screen keyboard comes with the following remote control:
+
+
+
+
+
+
+
+
+
+
+Write an algorithm that calculates:
+
+- The most efficient way to enter any given sentence in terms of number of key-strokes on the remote control. Note that there might be more than one way.
+- The actual sequence of key-presses on the remote control for each solution.
+
+The following rules apply:
+
+The initial position of the cursor is at the first character of the sentence that needs to be entered.
+Only one cursor key can be pressed on the remote control at the same time.
+When the cursor is on the top row and you press cursor-up on the remote control, the cursor will move to the corresponding column on the bottom row. 	Example: from E to {
+The same applies to the most left column, the most right column and the bottom-row when respectively  cursor-right, cursor-left and cursor-down are pressed on the remote control.
+Special moves:
+When the cursor is on the space bar and cursor-down is pressed on the remote control, the cursor will move to J.
+When the cursor is on the space bar and cursor-up is pressed on the remote control, the cursor will move to #.
+When the cursor is on J, K, L, M, N, O or P and cursor-up is pressed on the remote control, the cursor will move to the space bar.
+When the cursor is on 9, !, @, #, $, % or ^ and cursor-down is pressed, the cursor will move to the space bar.
+When the cursor is on back space (BS) and cursor-down is pressed on the remote control, the cursor will move to Z. 
+When the cursor is on back space (BS) and cursor-up is pressed on the remote control, the cursor will move to -. 
+When the cursor is on Y or Z and cursor-up is pressed on the remote control, the cursor will move to back space (BS)
+When the cursor is on + or - and cursor-down is pressed on the remote control, the cursor will move to back space (BS)
+
+Coding requirements:
+
+Please code your solution in PHP
+Your solution must include unit tests
+
+				Answers:
+
+1) First Assumption : By Default Cursor will be focus in first character of sentence.
+ASCII value of 
+	Space bar    =  	32
+	BS  	     = 	8
+	J	     =	74
+	K	     =	75
+	L	     =	76			
+	M	     =	77
+	N	     =  	78
+	O	     =	79	
+	P	     =	80
+	9	     =	57
+	!	     =	33
+	@	     =	64
+	#	     =	35
+	$	     =	36
+	%	     =	37
+	^	     =	94
+	Y	     =	89
+	Z	     =	90
+	+	     =	43
+	-	     =	45
+	LftArrowKey	= 	37			UpArrowkey		=	38
+	RightArrowKey	= 	39			DownArrowkey		= 	40	
+
+2) Second Assumption Firstly, we will move in horizontal then in Vertical direction.
+	
+3) First make two dimensional associative array `KEY` with ASCII value of keyboard character and VALUE with array of X and Y coordinate/position.
+$dataArray = array(array(0,0)=>65,array(0,1)=>66,array(0,2)=>67 ......array(0,25)=>90,array(1,0)=>97,array(1,1)=>98,.....array(1,25)=>122,array(2,0)=>48,array(2,1)=>49 .....array(2,25)=>45,array(3,0)=>39,array(3,18)=>126);
+
+4) Suppose I have to type below sentences to follow rules.
+$inputChars = "Your time remaining is shown in the top of the test window."
+
+/*First find the location of input character from DATA Array with array_search function, 
+it will give location of input character. Suppose new location */
+	
+	$printString =$inputChar[0]; 
+	$currCharval = ord($inputChar[0]);
+	$currLoc =array_search($currCharval ,$dataArray); 
+	$counter = 0;
+	
+5)
+function totalMovement($currLoc,$newLoc,$charval)
+{
+	$diffY  = $currLoc[0]-$newLoc[0]; // difference in Y direction
+	$diffX  = $currLoc[1]-$newLoc[1]; // difference in X direction 
+	$numpressX = 0;
+	$numpressY = 0;
+
+	if($currLoc[0] ==4)
+	{
+		if($diffX>=9 ||  $diffX<-9)) 
+		{
+			//Press left key
+			$numpressX = $diffX;
+		}
+		else if(($diffX>0 && $diffX<9) || ($diffX<0 && $diffX>-9)	
+		{
+			//Press Right Key	
+			$numpressX = $diffX;
+		}
+		if($diffY>=2)
+		{
+			if(in_array($charval,array(74,75,76,77,78,79,80)))
+			{
+				//Press up key
+				$numpressY = $diffY;
+			}
+			else if($charval==32))	
+			{
+				//Press up key
+				$numpressY = $diffY ;
+			}
+			else if($charval==8)
+			{
+				//Press up key
+				$numpressY = $diffY ;
+			}
+			else if(in_array($charval,array(89,90)))	
+			{
+				//Press up key	
+				$numpressY = $diffY ;
+			}	
+				
+	}
+	else
+	{
+		if($diffX>=13 || $diffX<-13) 
+		{
+			//Press left key
+			$numpressX = $diffX;
+		}
+		else if(($diffX>0 && $diffX<13) || ($diff<0 && $diffX>-13)	
+		{
+			//Press Right Key	
+			$numpressX = $diffX;
+		}
+		if($diffY>=2)
+		{
+			if(in_array($charval,array(57,33,64,35,36,37,94)))
+			{
+				//Press down key
+				$numpressY = $diffY;
+			}
+			else if($charval==32))	
+			{
+				//Press down key
+				$numpressY = $diffY ;
+			}
+			else if($charval==8)
+			{
+				//Press down key
+				$numpressY = $diffY ;
+			}
+			else if(in_array($charval,array(43,45)))	
+			{
+				//Press down key	
+				$numpressY = $diffY ;
+			}
+		}
+		
+	}
+		
+
+	return ($numpressX + $numpressY);	
+}
+
+for($i=1;$i<strlen($inputChar);$i++)
+{
+	$asciival = ord($inputChar[$i]);
+	$newLoc = array_search($asciival,$dataArray);
+	if($newLoc[0]==$currLoc[0] && $newLoc[1]==$currLoc[1] )
+	{
+		//No Need to Movement just print only character 
+		
+	}
+	else
+	{
+		$counter    = totalMovement($currLoc,$newLoc,$currCharval);
+		
+	}
+	$currLoc       =  $newLoc;
+	$printString .=  $inputChar[$i];
+	$currCharval = $asciival;
+}
+
+if($printString==$inputChars)
+echo “Printed Correctly”;
+else
+echo “Unmatched String”;
+class SpeedTypingTest extends PHPUnit_Framework_TestCase
+{
+protected $_totalMovment   = null;
+protected $_printChar = null; 
+
+public function setUp($inputChar)
+{
+	$this->_totalMovment   = 0;
+	$this->_printChar = $inputChar;
+	
+}
+
+public function tearDown()
+{
+       	unset($_totalMovment);
+	unset($this->_printChar);
+}
+
+public function testLeftMovement()
+{
+	$this->_totalMovment =  totalMovement();
+}
+public function testRightMovement()
+{
+	$this->_totalMovment  = totalMovement();
+}
+}
